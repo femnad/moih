@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	version = "0.1.1"
+	version = "0.1.2"
 )
 
 type BucketTarget struct {
@@ -38,10 +38,10 @@ type PutCmd struct {
 }
 
 type UpdateCmd struct {
-	ApiToken string `arg:"env:API_TOKEN,required" help:"GitHub API token with admin:public_key permissions"`
+	ApiToken string `arg:"env:API_TOKEN,required,-a" help:"GitHub API token with admin:public_key permissions"`
 	KeyFile string `arg:"required,-f" help:"the public key file to upload"`
 	KeyName string `arg:"required,-n" help:"Key name as list in GitHub"`
-	User string `arg:"env:USER,required" help:"GitHub username"`
+	User string `arg:"env:USER,required,-u" help:"GitHub username"`
 }
 
 type Base struct {}
