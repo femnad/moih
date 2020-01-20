@@ -20,7 +20,7 @@ moih put [-c CREDENTIALFILE] -o OBJECTNAME -b BUCKETNAME -p KEYSECRET -p SECRETF
 
 #### Common Options for `get` and `put`
 
-* `KEYSECRET`: A [pass](pass) secret storing a symmetric key
+* `KEYSECRET`: A [pass] secret storing a symmetric key
 * `CREDENTIALFILE`: A Google Cloud credentials file, if not provided default to the usual credential lookup
 
 ### Create or Update a Key on GitHub
