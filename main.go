@@ -13,18 +13,18 @@ import (
 )
 
 const (
-	version = "0.1.0"
+	version = "0.1.1"
 )
 
 type BucketTarget struct {
 	CredentialFile string `arg:"-c"`
-	ObjectName string `arg:"required,-k"`
+	ObjectName string `arg:"required,-o"`
 	BucketName string `arg:"required,-b"`
 }
 
 type EncryptionTarget struct {
-	KeySecret  string `arg:"required,-p" help:"a pass secret storing a key"`
-	SecretFile string `arg:"required,-f" help:"a file containing a private SSH key"`
+	KeySecret  string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
+	SecretFile string `arg:"required,-f" help:"a private SSH key file"`
 }
 
 type GetCmd struct {
@@ -38,10 +38,10 @@ type PutCmd struct {
 }
 
 type UpdateCmd struct {
-	ApiToken string `arg:"env:API_TOKEN,required"`
-	KeyFile string `arg:"required,-f"`
-	KeyName string `arg:"required,-n"`
-	User string `arg:"env:USER,required"`
+	ApiToken string `arg:"env:API_TOKEN,required" help:"GitHub API token with admin:public_key permissions"`
+	KeyFile string `arg:"required,-f" help:"the public key file to upload"`
+	KeyName string `arg:"required,-n" help:"Key name as list in GitHub"`
+	User string `arg:"env:USER,required" help:"GitHub username"`
 }
 
 type Base struct {}
@@ -52,8 +52,8 @@ func (Base) Version() string {
 
 var args struct {
 	Base
-	Get *GetCmd `arg:"subcommand:get" help:"get a key"`
-	Put *PutCmd `arg:"subcommand:put" help:"put a key"`
+	Get *GetCmd `arg:"subcommand:get" help:"get a key from GCP Cloud Storage"`
+	Put *PutCmd `arg:"subcommand:put" help:"put a key into GCP Cloud Storage"`
 	Update *UpdateCmd `arg:"subcommand:update" help:"update a key in GitHub"`
 }
 
