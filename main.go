@@ -12,6 +12,10 @@ import (
 	"path"
 )
 
+const (
+	version = "0.1.0"
+)
+
 type BucketTarget struct {
 	CredentialFile string `arg:"-c"`
 	ObjectName string `arg:"required,-k"`
@@ -40,7 +44,14 @@ type UpdateCmd struct {
 	User string `arg:"env:USER,required"`
 }
 
-var args struct{
+type Base struct {}
+
+func (Base) Version() string {
+	return version
+}
+
+var args struct {
+	Base
 	Get *GetCmd `arg:"subcommand:get" help:"get a key"`
 	Put *PutCmd `arg:"subcommand:put" help:"put a key"`
 	Update *UpdateCmd `arg:"subcommand:update" help:"update a key in GitHub"`
