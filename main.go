@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	version = "0.1.2"
+	version = "0.1.3"
 )
 
 type BucketTarget struct {
@@ -92,6 +92,7 @@ func main()  {
 			CredentialsFile: get.CredentialFile,
 		}
 		content, err := gcpstorage.Download(storageAsset)
+		mustSucceed(err)
 		key := getSecretKey(get.KeySecret)
 		decrypted, err := symmetric.Decrypt(key, content)
 		mustSucceed(err)
