@@ -2,30 +2,22 @@ package githubkey
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/google/go-github/v29/github"
-	"io/ioutil"
 )
 
-func UpdateKey(token, username, title, keyFile string) (err error) {
+func UpdateKey(token, username, title, keyContent string) (err error) {
 	transport := github.BasicAuthTransport{
-		Username:  username,
-		Password:  token,
+		Username: username,
+		Password: token,
 	}
 
 	client := github.NewClient(transport.Client())
 	users := client.Users
 
-	content, err := ioutil.ReadFile(keyFile)
-	if err != nil {
-		return fmt.Errorf("error reading file %s: %s", keyFile, err)
-	}
-
-	publicKey := string(content)
-
 	key := github.Key{
-		Key:       &publicKey,
-		Title:     &title,
+		Key:   &keyContent,
+		Title: &title,
 	}
 	ctx := context.Background()
 
@@ -36,4 +28,3 @@ func UpdateKey(token, username, title, keyFile string) (err error) {
 
 	return
 }
-

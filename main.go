@@ -1,25 +1,29 @@
 package main
 
 import (
-	"github.com/alexflint/go-arg"
-	"github.com/femnad/moih/gcpstorage"
-	"github.com/femnad/moih/githubkey"
-	"github.com/femnad/moih/passread"
-	"github.com/femnad/moih/symmetric"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+
+	"github.com/alexflint/go-arg"
+	"github.com/femnad/moih/gcpstorage"
+	"github.com/femnad/moih/githubkey"
+	"github.com/femnad/moih/gitlabkey"
+	"github.com/femnad/moih/passread"
+	"github.com/femnad/moih/symmetric"
 )
 
 const (
 	version = "0.1.3"
+	GitHub  = "github"
+	GitLab  = "gitlab"
 )
 
 type BucketTarget struct {
 	CredentialFile string `arg:"-c"`
-	ObjectName string `arg:"required,-o"`
-	BucketName string `arg:"required,-b"`
+	ObjectName     string `arg:"required,-o"`
+	BucketName     string `arg:"required,-b"`
 }
 
 type EncryptionTarget struct {
@@ -38,13 +42,24 @@ type PutCmd struct {
 }
 
 type UpdateCmd struct {
-	ApiToken string `arg:"env:API_TOKEN,required,-a" help:"GitHub API token with admin:public_key permissions"`
-	KeyFile string `arg:"required,-f" help:"the public key file to upload"`
-	KeyName string `arg:"required,-n" help:"Key name as list in GitHub"`
-	User string `arg:"env:USER,required,-u" help:"GitHub username"`
+	ApiToken string `arg:"env:API_TOKEN,required,-a" help:"Git(Hub|Lab) API token with admin:public_key permissions"`
+	KeyFile  string `arg:"required,-f" help:"the public key file to upload"`
+	KeyName  string `arg:"required,-n" help:"Key name as listed in Git(Hub|Lab)"`
+	User     string `arg:"env:USER,required,-u" help:"GitHub username"`
+	Target   string `arg:"required,-t" help:"target, gitlab or github"`
 }
 
-type Base struct {}
+func (u UpdateCmd) updateGitHub(key string) {
+	err := githubkey.UpdateKey(u.ApiToken, u.User, u.KeyName, key)
+	mustSucceed(err)
+}
+
+func (u UpdateCmd) updateGitLab(key string) {
+	err := gitlabkey.UpdateKey(u.ApiToken, u.KeyName, key)
+	mustSucceed(err)
+}
+
+type Base struct{}
 
 func (Base) Version() string {
 	return version
@@ -52,8 +67,8 @@ func (Base) Version() string {
 
 var args struct {
 	Base
-	Get *GetCmd `arg:"subcommand:get" help:"get a key from GCP Cloud Storage"`
-	Put *PutCmd `arg:"subcommand:put" help:"put a key into GCP Cloud Storage"`
+	Get    *GetCmd    `arg:"subcommand:get" help:"get a key from GCP Cloud Storage"`
+	Put    *PutCmd    `arg:"subcommand:put" help:"put a key into GCP Cloud Storage"`
 	Update *UpdateCmd `arg:"subcommand:update" help:"update a key in GitHub"`
 }
 
@@ -69,7 +84,13 @@ func getSecretKey(keySecret string) []byte {
 	return []byte(key)
 }
 
-func main()  {
+func getPublicKey(keyFile string) string {
+	content, err := ioutil.ReadFile(keyFile)
+	mustSucceed(err)
+	return string(content)
+}
+
+func main() {
 	p := arg.MustParse(&args)
 	switch {
 	case args.Put != nil:
@@ -106,10 +127,19 @@ func main()  {
 		mustSucceed(err)
 	case args.Update != nil:
 		update := args.Update
-		err := githubkey.UpdateKey(update.ApiToken, update.User, update.KeyName, update.KeyFile)
-		mustSucceed(err)
+		key := getPublicKey(update.KeyFile)
+		switch {
+		case update.Target == GitHub:
+			update.updateGitHub(key)
+		case update.Target == GitLab:
+			update.updateGitLab(key)
+		case update.Target == "":
+			update.updateGitHub(key)
+			update.updateGitLab(key)
+		default:
+			log.Fatalf("Unknown target: %s", update.Target)
+		}
 	case true:
 		p.WriteHelp(os.Stdout)
 	}
 }
-
