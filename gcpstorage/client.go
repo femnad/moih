@@ -15,12 +15,12 @@ import (
 
 type clientWithContext struct {
 	client *storage.Client
-	ctx context.Context
+	ctx    context.Context
 }
 
 type StorageAsset struct {
-	BucketName string
-	ObjectName string
+	BucketName      string
+	ObjectName      string
 	CredentialsFile string
 }
 
@@ -48,7 +48,7 @@ func getClient(credentialsFile string) (clientWithContext, error) {
 		return clientWithContext{
 			client: client,
 			ctx:    ctx,
-		} , nil
+		}, nil
 	}
 	return clientFromCredentials(credentialsFile)
 }
@@ -97,7 +97,7 @@ func Download(storageAsset StorageAsset) (content []byte, err error) {
 	object := bucket.Object(objectName)
 	reader, err := object.NewReader(ctx)
 	if err != nil {
-		return content, fmt.Errorf("error getting a reader for object %s in bucket %s", objectName, bucketName)
+		return content, fmt.Errorf("error getting a reader for object %s in bucket %s: %v", objectName, bucketName, err)
 	}
 
 	defer func(r io.ReadCloser) {

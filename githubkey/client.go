@@ -3,7 +3,7 @@ package githubkey
 import (
 	"context"
 
-	"github.com/google/go-github/v29/github"
+	"github.com/google/go-github/v32/github"
 )
 
 func UpdateKey(token, username, title, keyContent string) (err error) {
