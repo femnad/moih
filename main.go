@@ -15,30 +15,25 @@ import (
 )
 
 const (
-	version = "0.1.3"
+	version = "0.2.0"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
 
-type BucketTarget struct {
-	CredentialFile string `arg:"-c"`
-	ObjectName     string `arg:"required,-o"`
-	BucketName     string `arg:"required,-b"`
-}
-
-type EncryptionTarget struct {
-	KeySecret  string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
-	SecretFile string `arg:"required,-f" help:"a private SSH key file"`
+type PrivateKeyInfo struct {
+	CredentialFile string `arg:"-c" help:"GCP credentials file"`
+	ObjectName     string `arg:"-o" default:"private/$HOSTNAME" help:"Object name for the key file"`
+	BucketName     string `arg:"required,-b" help:"The bucket to use"`
+	KeySecret      string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
+	PrivateKey     string `arg:"-f" default:"$HOME/.ssh/$HOSTNAME" help:"a private SSH key file"`
 }
 
 type GetCmd struct {
-	BucketTarget
-	EncryptionTarget
+	PrivateKeyInfo
 }
 
 type PutCmd struct {
-	BucketTarget
-	EncryptionTarget
+	PrivateKeyInfo
 }
 
 type UpdateCmd struct {
@@ -96,11 +91,11 @@ func main() {
 	case args.Put != nil:
 		put := args.Put
 		key := getSecretKey(put.KeySecret)
-		encrypted, err := symmetric.Encrypt(key, put.SecretFile)
+		encrypted, err := symmetric.Encrypt(key, os.ExpandEnv(put.PrivateKey))
 		mustSucceed(err)
 		storageAsset := gcpstorage.StorageAsset{
 			BucketName:      put.BucketName,
-			ObjectName:      put.ObjectName,
+			ObjectName:      os.ExpandEnv(put.ObjectName),
 			CredentialsFile: put.CredentialFile,
 		}
 		err = gcpstorage.Upload(storageAsset, encrypted)
@@ -109,7 +104,7 @@ func main() {
 		get := args.Get
 		storageAsset := gcpstorage.StorageAsset{
 			BucketName:      get.BucketName,
-			ObjectName:      get.ObjectName,
+			ObjectName:      os.ExpandEnv(get.ObjectName),
 			CredentialsFile: get.CredentialFile,
 		}
 		content, err := gcpstorage.Download(storageAsset)
@@ -118,12 +113,12 @@ func main() {
 		decrypted, err := symmetric.Decrypt(key, content)
 		mustSucceed(err)
 
-		outputParent := path.Dir(get.SecretFile)
+		outputParent := path.Dir(os.ExpandEnv(get.PrivateKey))
 		if _, err = os.Stat(outputParent); os.IsNotExist(err) {
 			err := os.MkdirAll(outputParent, 0700)
 			mustSucceed(err)
 		}
-		err = ioutil.WriteFile(get.SecretFile, decrypted, 0600)
+		err = ioutil.WriteFile(os.ExpandEnv(get.PrivateKey), decrypted, 0600)
 		mustSucceed(err)
 	case args.Update != nil:
 		update := args.Update
