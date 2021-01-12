@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,17 +17,17 @@ import (
 )
 
 const (
-	version = "0.2.0"
+	version = "0.3.0"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
 
 type PrivateKeyInfo struct {
 	CredentialFile string `arg:"-c" help:"GCP credentials file"`
-	ObjectName     string `arg:"-o" default:"private/$HOSTNAME" help:"Object name for the key file"`
+	ObjectName     string `arg:"-o" default:"private/{{ hostname }}" help:"Object name for the key file"`
 	BucketName     string `arg:"required,-b" help:"The bucket to use"`
 	KeySecret      string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
-	PrivateKey     string `arg:"-f" default:"$HOME/.ssh/$HOSTNAME" help:"a private SSH key file"`
+	PrivateKey     string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}" help:"a private SSH key file"`
 }
 
 type GetCmd struct {
@@ -85,6 +87,32 @@ func getPublicKey(keyFile string) string {
 	return string(content)
 }
 
+func getHostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+	    log.Fatalf("error getting hostname: %v", err)
+	}
+
+	return hostname
+}
+
+func expandTemplate(text string) string {
+	tmpl := template.New("moih")
+	tmpl.Funcs(map[string]interface{}{"hostname": getHostname})
+	parsed, err := tmpl.Parse(text)
+	if err != nil {
+	    log.Fatalf("error parsing template %s: %v", text, err)
+	}
+
+	out := bytes.Buffer{}
+	err = parsed.Execute(&out, struct{}{})
+	if err != nil {
+	    log.Fatalf("error executing template %s: %v", text, err)
+	}
+
+	return out.String()
+}
+
 func main() {
 	p := arg.MustParse(&args)
 	switch {
@@ -95,7 +123,7 @@ func main() {
 		mustSucceed(err)
 		storageAsset := gcpstorage.StorageAsset{
 			BucketName:      put.BucketName,
-			ObjectName:      os.ExpandEnv(put.ObjectName),
+			ObjectName:      expandTemplate(put.ObjectName),
 			CredentialsFile: put.CredentialFile,
 		}
 		err = gcpstorage.Upload(storageAsset, encrypted)
@@ -104,7 +132,7 @@ func main() {
 		get := args.Get
 		storageAsset := gcpstorage.StorageAsset{
 			BucketName:      get.BucketName,
-			ObjectName:      os.ExpandEnv(get.ObjectName),
+			ObjectName:      expandTemplate(get.ObjectName),
 			CredentialsFile: get.CredentialFile,
 		}
 		content, err := gcpstorage.Download(storageAsset)
