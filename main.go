@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	version = "0.3.1"
+	version = "0.3.2"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
@@ -97,8 +97,11 @@ func getHostname() string {
 }
 
 func expandTemplate(text string) string {
+	text = os.ExpandEnv(text)
+
 	tmpl := template.New("moih")
 	tmpl.Funcs(map[string]interface{}{"hostname": getHostname})
+
 	parsed, err := tmpl.Parse(text)
 	if err != nil {
 	    log.Fatalf("error parsing template %s: %v", text, err)
