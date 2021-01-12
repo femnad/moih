@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	version = "0.3.0"
+	version = "0.3.1"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
@@ -119,7 +119,7 @@ func main() {
 	case args.Put != nil:
 		put := args.Put
 		key := getSecretKey(put.KeySecret)
-		encrypted, err := symmetric.Encrypt(key, os.ExpandEnv(put.PrivateKey))
+		encrypted, err := symmetric.Encrypt(key, expandTemplate(put.PrivateKey))
 		mustSucceed(err)
 		storageAsset := gcpstorage.StorageAsset{
 			BucketName:      put.BucketName,
@@ -141,12 +141,12 @@ func main() {
 		decrypted, err := symmetric.Decrypt(key, content)
 		mustSucceed(err)
 
-		outputParent := path.Dir(os.ExpandEnv(get.PrivateKey))
+		outputParent := path.Dir(expandTemplate(get.PrivateKey))
 		if _, err = os.Stat(outputParent); os.IsNotExist(err) {
 			err := os.MkdirAll(outputParent, 0700)
 			mustSucceed(err)
 		}
-		err = ioutil.WriteFile(os.ExpandEnv(get.PrivateKey), decrypted, 0600)
+		err = ioutil.WriteFile(expandTemplate(get.PrivateKey), decrypted, 0600)
 		mustSucceed(err)
 	case args.Update != nil:
 		update := args.Update
