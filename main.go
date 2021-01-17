@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	version = "0.3.2"
+	version = "0.4.0"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
@@ -39,20 +39,20 @@ type PutCmd struct {
 }
 
 type UpdateCmd struct {
-	ApiToken string `arg:"env:API_TOKEN,required,-a" help:"Git(Hub|Lab) API token with admin:public_key permissions"`
-	KeyFile  string `arg:"required,-f" help:"the public key file to upload"`
-	KeyName  string `arg:"required,-n" help:"Key name as listed in Git(Hub|Lab)"`
-	User     string `arg:"env:USER,required,-u" help:"GitHub username"`
-	Target   string `arg:"required,-t" help:"target, gitlab or github"`
+	ApiTokenSecret string `arg:"required,-a" help:"Git(Hub|Lab) pass secret containing API token with admin:public_key permissions"`
+	KeyFile        string `arg:"-f" default:"private/{{ hostname }}" help:"the public key file to upload"`
+	KeyName        string `arg:"-n" default:"{{ hostname }}" help:"Key name as listed in Git(Hub|Lab)"`
+	User           string `arg:"-u" default:"{{ username }}" help:"GitHub username"`
+	Target         string `arg:"required,-t" help:"target, gitlab or github"`
 }
 
-func (u UpdateCmd) updateGitHub(key string) {
-	err := githubkey.UpdateKey(u.ApiToken, u.User, u.KeyName, key)
+func (u UpdateCmd) updateGitHub(key string, apiSecret string) {
+	err := githubkey.UpdateKey(apiSecret, expandTemplate(u.User), expandTemplate(u.KeyName), key)
 	mustSucceed(err)
 }
 
-func (u UpdateCmd) updateGitLab(key string) {
-	err := gitlabkey.UpdateKey(u.ApiToken, u.KeyName, key)
+func (u UpdateCmd) updateGitLab(key string, apiSecret string) {
+	err := gitlabkey.UpdateKey(apiSecret, expandTemplate(u.KeyName), key)
 	mustSucceed(err)
 }
 
@@ -96,11 +96,18 @@ func getHostname() string {
 	return hostname
 }
 
+func getUsername() string {
+	return os.Getenv("USER")
+}
+
 func expandTemplate(text string) string {
 	text = os.ExpandEnv(text)
 
 	tmpl := template.New("moih")
-	tmpl.Funcs(map[string]interface{}{"hostname": getHostname})
+	tmpl.Funcs(map[string]interface{}{
+		"hostname": getHostname,
+		"username": getUsername,
+	})
 
 	parsed, err := tmpl.Parse(text)
 	if err != nil {
@@ -153,15 +160,13 @@ func main() {
 		mustSucceed(err)
 	case args.Update != nil:
 		update := args.Update
-		key := getPublicKey(update.KeyFile)
+		key := getPublicKey(expandTemplate(update.KeyFile))
+		apiSecret := string(getSecretKey(update.ApiTokenSecret))
 		switch {
 		case update.Target == GitHub:
-			update.updateGitHub(key)
+			update.updateGitHub(key, apiSecret)
 		case update.Target == GitLab:
-			update.updateGitLab(key)
-		case update.Target == "":
-			update.updateGitHub(key)
-			update.updateGitLab(key)
+			update.updateGitLab(key, apiSecret)
 		default:
 			log.Fatalf("Unknown target: %s", update.Target)
 		}
