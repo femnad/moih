@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	version = "0.4.0"
+	version = "0.4.1"
 	GitHub  = "github"
 	GitLab  = "gitlab"
 )
@@ -40,9 +40,9 @@ type PutCmd struct {
 
 type UpdateCmd struct {
 	ApiTokenSecret string `arg:"required,-a" help:"Git(Hub|Lab) pass secret containing API token with admin:public_key permissions"`
-	KeyFile        string `arg:"-f" default:"private/{{ hostname }}" help:"the public key file to upload"`
+	KeyFile        string `arg:"-f" help:"the public key file to upload"`
 	KeyName        string `arg:"-n" default:"{{ hostname }}" help:"Key name as listed in Git(Hub|Lab)"`
-	User           string `arg:"-u" default:"{{ username }}" help:"GitHub username"`
+	User           string `arg:"-u" default:"{{ username }}" help:"Git(Hub|Lab) username"`
 	Target         string `arg:"required,-t" help:"target, gitlab or github"`
 }
 
@@ -162,10 +162,10 @@ func main() {
 		update := args.Update
 		key := getPublicKey(expandTemplate(update.KeyFile))
 		apiSecret := string(getSecretKey(update.ApiTokenSecret))
-		switch {
-		case update.Target == GitHub:
+		switch update.Target {
+		case GitHub:
 			update.updateGitHub(key, apiSecret)
-		case update.Target == GitLab:
+		case GitLab:
 			update.updateGitLab(key, apiSecret)
 		default:
 			log.Fatalf("Unknown target: %s", update.Target)
