@@ -39,21 +39,21 @@ func updateGitLab(cfg UpdateCfg, key string, apiSecret string) error {
 func Update(cfg UpdateCfg) error {
 	keyFile, err := expandTemplate(cfg.KeyFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error expanding key file name template: %v", err)
 	}
 
 	pubKey, err := os.ReadFile(keyFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading public key file %s: %v", keyFile, err)
 	}
 	keyContent := string(pubKey)
 
 	secretKey, err := getSecretKey(cfg.ApiTokenSecret)
 	if err != nil {
-		return err
+		return fmt.Errorf("error looking up secret %s: %v", cfg.ApiTokenSecret, err)
 	}
-
 	apiSecret := string(secretKey)
+
 	switch cfg.Target {
 	case gitHub:
 		return updateGitHub(cfg, keyContent, apiSecret)

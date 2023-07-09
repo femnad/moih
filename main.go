@@ -11,18 +11,6 @@ const (
 	version = "0.4.2"
 )
 
-type GetCmd struct {
-	cmd.KeyCfg
-}
-
-type PutCmd struct {
-	cmd.KeyCfg
-}
-
-type UpdateCmd struct {
-	cmd.UpdateCfg
-}
-
 type Base struct{}
 
 func (Base) Version() string {
@@ -31,9 +19,9 @@ func (Base) Version() string {
 
 var args struct {
 	Base
-	Get    *GetCmd    `arg:"subcommand:get" help:"get a key from GCP Cloud Storage"`
-	Put    *PutCmd    `arg:"subcommand:put" help:"put a key into GCP Cloud Storage"`
-	Update *UpdateCmd `arg:"subcommand:update" help:"update a key in GitHub"`
+	Get    *cmd.KeyCfg    `arg:"subcommand:get" help:"get a key from GCP Cloud Storage"`
+	Put    *cmd.KeyCfg    `arg:"subcommand:put" help:"put a key into GCP Cloud Storage"`
+	Update *cmd.UpdateCfg `arg:"subcommand:update" help:"update a key in GitHub"`
 }
 
 func mustSucceed(err error) {
@@ -47,15 +35,15 @@ func main() {
 
 	switch {
 	case args.Put != nil:
-		err := cmd.Put(args.Put.KeyCfg)
+		err := cmd.Put(*args.Put)
 		mustSucceed(err)
 
 	case args.Get != nil:
-		err := cmd.Get(args.Get.KeyCfg)
+		err := cmd.Get(*args.Get)
 		mustSucceed(err)
 
 	case args.Update != nil:
-		err := cmd.Update(args.Update.UpdateCfg)
+		err := cmd.Update(*args.Update)
 		mustSucceed(err)
 
 	case true:
