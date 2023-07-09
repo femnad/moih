@@ -7,23 +7,23 @@ import (
 	"path"
 )
 
-func Get(info PrivateKeyInfo) error {
-	objName, err := expandTemplate(info.ObjectName)
+func getKey(cfg KeyCfg, objectName, fileName string) error {
+	objName, err := expandTemplate(objectName)
 	if err != nil {
 		return err
 	}
 
 	storageAsset := gcpstorage.StorageAsset{
-		BucketName:      info.BucketName,
+		BucketName:      cfg.BucketName,
 		ObjectName:      objName,
-		CredentialsFile: info.CredentialFile,
+		CredentialsFile: cfg.CredentialFile,
 	}
 	content, err := gcpstorage.Download(storageAsset)
 	if err != nil {
 		return err
 	}
 
-	key, err := getSecretKey(info.KeySecret)
+	key, err := getSecretKey(cfg.KeySecret)
 	if err != nil {
 		return err
 	}
@@ -33,12 +33,12 @@ func Get(info PrivateKeyInfo) error {
 		return err
 	}
 
-	privKey, err := expandTemplate(info.PrivateKey)
+	keyFile, err := expandTemplate(fileName)
 	if err != nil {
 		return err
 	}
 
-	outputParent := path.Dir(privKey)
+	outputParent := path.Dir(keyFile)
 	if _, err = os.Stat(outputParent); os.IsNotExist(err) {
 		mErr := os.MkdirAll(outputParent, 0700)
 		if mErr != nil {
@@ -46,5 +46,14 @@ func Get(info PrivateKeyInfo) error {
 		}
 	}
 
-	return os.WriteFile(privKey, decrypted, 0600)
+	return os.WriteFile(keyFile, decrypted, 0600)
+}
+
+func Get(cfg KeyCfg) error {
+	err := getKey(cfg, cfg.PrivateObjectName, cfg.PrivateKey)
+	if err != nil {
+		return err
+	}
+
+	return getKey(cfg, cfg.PublicObjectName, cfg.PublicKey)
 }

@@ -5,32 +5,41 @@ import (
 	"github.com/femnad/moih/symmetric"
 )
 
-func Put(info PrivateKeyInfo) error {
-	key, err := getSecretKey(info.KeySecret)
+func put(cfg KeyCfg, objectName, fileName string) error {
+	key, err := getSecretKey(cfg.KeySecret)
 	if err != nil {
 		return err
 	}
 
-	privKey, err := expandTemplate(info.PrivateKey)
+	keyFile, err := expandTemplate(fileName)
 	if err != nil {
 		return err
 	}
 
-	encrypted, err := symmetric.Encrypt(key, privKey)
+	encrypted, err := symmetric.Encrypt(key, keyFile)
 	if err != nil {
 		return err
 	}
 
-	objName, err := expandTemplate(info.ObjectName)
+	objName, err := expandTemplate(objectName)
 	if err != nil {
 		return err
 	}
 
 	storageAsset := gcpstorage.StorageAsset{
-		BucketName:      info.BucketName,
+		BucketName:      cfg.BucketName,
 		ObjectName:      objName,
-		CredentialsFile: info.CredentialFile,
+		CredentialsFile: cfg.CredentialFile,
 	}
 
 	return gcpstorage.Upload(storageAsset, encrypted)
+}
+
+func Put(cfg KeyCfg) error {
+	err := put(cfg, cfg.PrivateObjectName, cfg.PrivateKey)
+	if err != nil {
+		return err
+	}
+
+	return put(cfg, cfg.PublicObjectName, cfg.PublicKey)
 }

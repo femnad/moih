@@ -12,11 +12,11 @@ const (
 )
 
 type GetCmd struct {
-	cmd.PrivateKeyInfo
+	cmd.KeyCfg
 }
 
 type PutCmd struct {
-	cmd.PrivateKeyInfo
+	cmd.KeyCfg
 }
 
 type UpdateCmd struct {
@@ -47,11 +47,11 @@ func main() {
 
 	switch {
 	case args.Put != nil:
-		err := cmd.Put(args.Put.PrivateKeyInfo)
+		err := cmd.Put(args.Put.KeyCfg)
 		mustSucceed(err)
 
 	case args.Get != nil:
-		err := cmd.Get(args.Get.PrivateKeyInfo)
+		err := cmd.Get(args.Get.KeyCfg)
 		mustSucceed(err)
 
 	case args.Update != nil:

@@ -1,11 +1,13 @@
 package cmd
 
-type PrivateKeyInfo struct {
-	CredentialFile string `arg:"-c" help:"GCP credentials file"`
-	ObjectName     string `arg:"-o" default:"private/{{ hostname }}" help:"Object name for the key file"`
-	BucketName     string `arg:"required,-b" help:"The bucket to use"`
-	KeySecret      string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
-	PrivateKey     string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}" help:"a private SSH key file"`
+type KeyCfg struct {
+	CredentialFile    string `arg:"-c" help:"GCP credentials file"`
+	PrivateObjectName string `arg:"-o" default:"key/{{ hostname }}/private" help:"Object name for the private key file"`
+	PublicObjectName  string `arg:"-o" default:"key/{{ hostname }}/public" help:"Object name for the public key file"`
+	BucketName        string `arg:"required,-b" help:"The bucket to use"`
+	KeySecret         string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
+	PrivateKey        string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}" help:"a private SSH key file"`
+	PublicKey         string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}.pub" help:"a private SSH key file"`
 }
 
 type UpdateCfg struct {
