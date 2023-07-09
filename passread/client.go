@@ -3,7 +3,7 @@ package passread
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os/exec"
 	"strings"
 )
@@ -16,7 +16,7 @@ func GetPassSecret(secret string) (out string, err error) {
 	if err != nil {
 		return out, fmt.Errorf("error getting pass secret %s: %s", secret, err)
 	}
-	outBytes, err := ioutil.ReadAll(&stdout)
+	outBytes, err := io.ReadAll(&stdout)
 	out = strings.TrimSpace(string(outBytes))
 	return
 }

@@ -8,7 +8,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 )
 
 func getCipher(key []byte) (cipher.AEAD, error) {
@@ -26,7 +26,7 @@ func getCipher(key []byte) (cipher.AEAD, error) {
 }
 
 func Encrypt(key []byte, secretFileName string) (output []byte, err error) {
-	content, err := ioutil.ReadFile(secretFileName)
+	content, err := os.ReadFile(secretFileName)
 	if err != nil {
 		return output, fmt.Errorf("error read file contents from %s: %s", secretFileName, err)
 	}
@@ -45,7 +45,7 @@ func Encrypt(key []byte, secretFileName string) (output []byte, err error) {
 	return
 }
 
-func Decrypt(key []byte, encrypted []byte) (output []byte, err error){
+func Decrypt(key []byte, encrypted []byte) (output []byte, err error) {
 	c, err := getCipher(key)
 	if err != nil {
 		return output, fmt.Errorf("error getting a cipher: %s", err)

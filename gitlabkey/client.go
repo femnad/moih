@@ -2,9 +2,8 @@ package gitlabkey
 
 import (
 	"fmt"
-	"io/ioutil"
-
 	"github.com/xanzy/go-gitlab"
+	"io"
 )
 
 func UpdateKey(token, title, keyContent string) error {
@@ -18,7 +17,7 @@ func UpdateKey(token, title, keyContent string) error {
 		return err
 	}
 	if resp.StatusCode != 201 {
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("error reading body with response %d: %w", resp.StatusCode, err)
 		}

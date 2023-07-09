@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -82,7 +81,7 @@ func getSecretKey(keySecret string) []byte {
 }
 
 func getPublicKey(keyFile string) string {
-	content, err := ioutil.ReadFile(keyFile)
+	content, err := os.ReadFile(keyFile)
 	mustSucceed(err)
 	return string(content)
 }
@@ -90,7 +89,7 @@ func getPublicKey(keyFile string) string {
 func getHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
-	    log.Fatalf("error getting hostname: %v", err)
+		log.Fatalf("error getting hostname: %v", err)
 	}
 
 	return hostname
@@ -111,13 +110,13 @@ func expandTemplate(text string) string {
 
 	parsed, err := tmpl.Parse(text)
 	if err != nil {
-	    log.Fatalf("error parsing template %s: %v", text, err)
+		log.Fatalf("error parsing template %s: %v", text, err)
 	}
 
 	out := bytes.Buffer{}
 	err = parsed.Execute(&out, struct{}{})
 	if err != nil {
-	    log.Fatalf("error executing template %s: %v", text, err)
+		log.Fatalf("error executing template %s: %v", text, err)
 	}
 
 	return out.String()
@@ -156,7 +155,7 @@ func main() {
 			err := os.MkdirAll(outputParent, 0700)
 			mustSucceed(err)
 		}
-		err = ioutil.WriteFile(expandTemplate(get.PrivateKey), decrypted, 0600)
+		err = os.WriteFile(expandTemplate(get.PrivateKey), decrypted, 0600)
 		mustSucceed(err)
 	case args.Update != nil:
 		update := args.Update
