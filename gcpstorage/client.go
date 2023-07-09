@@ -54,12 +54,12 @@ func getClient(credentialsFile string) (clientWithContext, error) {
 }
 
 func Upload(storageAsset StorageAsset, content []byte) (err error) {
-	clientWithContext, err := getClient(storageAsset.CredentialsFile)
+	clientCtx, err := getClient(storageAsset.CredentialsFile)
 	if err != nil {
 		return fmt.Errorf("error getting storage client: %s", err)
 	}
-	client := clientWithContext.client
-	ctx := clientWithContext.ctx
+	client := clientCtx.client
+	ctx := clientCtx.ctx
 
 	bucketName := storageAsset.BucketName
 	objectName := storageAsset.ObjectName
