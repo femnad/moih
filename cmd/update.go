@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/femnad/moih/githubkey"
 	"github.com/femnad/moih/gitlabkey"
 )
@@ -40,10 +42,11 @@ func Update(cfg UpdateCfg) error {
 		return err
 	}
 
-	pubKey, err := getPublicKey(keyFile)
+	pubKey, err := os.ReadFile(keyFile)
 	if err != nil {
 		return err
 	}
+	keyContent := string(pubKey)
 
 	secretKey, err := getSecretKey(cfg.ApiTokenSecret)
 	if err != nil {
@@ -53,9 +56,9 @@ func Update(cfg UpdateCfg) error {
 	apiSecret := string(secretKey)
 	switch cfg.Target {
 	case gitHub:
-		return updateGitHub(cfg, pubKey, apiSecret)
+		return updateGitHub(cfg, keyContent, apiSecret)
 	case gitLab:
-		return updateGitLab(cfg, pubKey, apiSecret)
+		return updateGitLab(cfg, keyContent, apiSecret)
 	default:
 		return fmt.Errorf("unknown target: %s", cfg.Target)
 	}
