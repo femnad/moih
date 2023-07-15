@@ -18,16 +18,15 @@ func UpdateKey(token, username, title, keyContent string) error {
 	for _, key := range keys {
 		if key.Title == title {
 			keyId = key.ID
+			break
 		}
 	}
 
-	if keyId == 0 {
-		return fmt.Errorf("unable to find key with title %s", title)
-	}
-
-	_, err = client.Users.DeleteSSHKey(keyId)
-	if err != nil {
-		return err
+	if keyId != 0 {
+		_, err = client.Users.DeleteSSHKey(keyId)
+		if err != nil {
+			return err
+		}
 	}
 
 	opts := gitlab.AddSSHKeyOptions{Title: &title, Key: &keyContent}
