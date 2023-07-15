@@ -21,6 +21,11 @@ func UpdateKey(token, username, title, keyContent string) (err error) {
 	}
 	ctx := context.Background()
 
+	_, err = users.DeleteKey(ctx, *key.ID)
+	if err != nil {
+		return err
+	}
+
 	_, _, err = users.CreateKey(ctx, &key)
 	if err != nil {
 		return err

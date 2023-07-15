@@ -2,20 +2,40 @@ package gitlabkey
 
 import (
 	"fmt"
-	"github.com/xanzy/go-gitlab"
 	"io"
+
+	"github.com/xanzy/go-gitlab"
 )
 
-func UpdateKey(token, title, keyContent string) error {
-	git, err := gitlab.NewClient(token)
+func UpdateKey(token, username, title, keyContent string) error {
+	client, err := gitlab.NewClient(token)
 	if err != nil {
 		return err
 	}
+
+	var keyId int
+	keys, resp, err := client.Users.ListSSHKeysForUser(username, &gitlab.ListSSHKeysForUserOptions{})
+	for _, key := range keys {
+		if key.Title == title {
+			keyId = key.ID
+		}
+	}
+
+	if keyId == 0 {
+		return fmt.Errorf("unable to find key with title %s", title)
+	}
+
+	_, err = client.Users.DeleteSSHKey(keyId)
+	if err != nil {
+		return err
+	}
+
 	opts := gitlab.AddSSHKeyOptions{Title: &title, Key: &keyContent}
-	_, resp, err := git.Users.AddSSHKey(&opts)
+	_, resp, err = client.Users.AddSSHKey(&opts)
 	if err != nil {
 		return err
 	}
+
 	if resp.StatusCode != 201 {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -23,5 +43,6 @@ func UpdateKey(token, title, keyContent string) error {
 		}
 		return fmt.Errorf("error adding SSH key with response %d: %s", resp.StatusCode, string(body))
 	}
+
 	return nil
 }

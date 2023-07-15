@@ -33,7 +33,7 @@ func updateGitLab(cfg UpdateCfg, key string, apiSecret string) error {
 		return err
 	}
 
-	return gitlabkey.UpdateKey(apiSecret, title, key)
+	return gitlabkey.UpdateKey(apiSecret, cfg.User, title, key)
 }
 
 func Update(cfg UpdateCfg) error {
