@@ -1,14 +1,19 @@
 package cmd
 
 import (
-	"github.com/femnad/moih/passread"
+	"github.com/femnad/moih/secret"
 )
 
 func getSecretKey(keySecret string) ([]byte, error) {
-	key, err := passread.GetPassSecret(keySecret)
+	mgr := passwordManager()
+	key, err := mgr.ReadSecret(keySecret)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	return []byte(key), nil
+}
+
+func passwordManager() secret.Manager {
+	return secret.Pass{}
 }

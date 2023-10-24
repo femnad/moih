@@ -1,4 +1,4 @@
-package passread
+package secret
 
 import (
 	"bytes"
@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-func GetPassSecret(secret string) (out string, err error) {
+type Pass struct {
+}
+
+func (p Pass) ReadSecret(secret string) (out string, err error) {
 	cmd := exec.Command("pass", secret)
 	stdout := bytes.Buffer{}
 	cmd.Stdout = &stdout
