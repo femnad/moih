@@ -24,7 +24,7 @@ func passwordManager(pwMgr string) (secret.Manager, error) {
 	case "pass":
 		return secret.Pass{}, nil
 	case "1password":
-		return &secret.OnePassword{}, nil
+		return secret.OnePassword{}, nil
 	default:
 		return nil, fmt.Errorf("unknown password manager: %s", pwMgr)
 	}
