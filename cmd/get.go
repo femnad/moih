@@ -23,7 +23,7 @@ func getKey(cfg KeyCfg, objectName, fileName string) error {
 		return err
 	}
 
-	key, err := getSecretKey(cfg.KeySecret)
+	key, err := getSecretKey(cfg.PasswordManager, cfg.KeySecret)
 	if err != nil {
 		return err
 	}

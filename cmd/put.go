@@ -6,7 +6,7 @@ import (
 )
 
 func put(cfg KeyCfg, objectName, fileName string) error {
-	key, err := getSecretKey(cfg.KeySecret)
+	key, err := getSecretKey(cfg.PasswordManager, cfg.KeySecret)
 	if err != nil {
 		return err
 	}

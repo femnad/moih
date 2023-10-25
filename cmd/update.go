@@ -48,7 +48,7 @@ func Update(cfg UpdateCfg) error {
 	}
 	keyContent := string(pubKey)
 
-	secretKey, err := getSecretKey(cfg.ApiTokenSecret)
+	secretKey, err := getSecretKey(cfg.PasswordManager, cfg.ApiTokenSecret)
 	if err != nil {
 		return fmt.Errorf("error looking up secret %s: %v", cfg.ApiTokenSecret, err)
 	}
