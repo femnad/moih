@@ -4,7 +4,7 @@ type KeyCfg struct {
 	BucketName        string `arg:"required,-b" help:"The bucket to use"`
 	CredentialFile    string `arg:"-c" help:"GCP credentials file"`
 	KeySecret         string `arg:"required,-p" help:"a pass secret storing a symmetric key"`
-	PasswordManager   string `arg:"-p" default:"pass" help:"Password manager, pass or 1password"`
+	PasswordManager   string `arg:"-P" default:"pass" help:"Password manager, pass or 1password"`
 	PrivateKey        string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}" help:"a private SSH key file"`
 	PrivateObjectName string `arg:"-o" default:"key/{{ hostname }}/private" help:"Object name for the private key file"`
 	PublicKey         string `arg:"-l" default:"$HOME/.ssh/{{ hostname }}.pub" help:"a private SSH key file"`
