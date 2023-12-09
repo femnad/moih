@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	version = "v0.7.1"
+	version = "v0.7.2"
 )
 
 type Base struct{}

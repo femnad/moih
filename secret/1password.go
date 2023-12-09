@@ -31,16 +31,20 @@ func (o OnePassword) ReadSecret(secret string) (string, error) {
 		return "", err
 	}
 
-	scr := opSecret{}
+	if err = cmd.Start(); err != nil {
+		return "", err
+	}
+
+	var decoded opSecret
 	decoder := json.NewDecoder(stdout)
-	err = decoder.Decode(&scr)
+	err = decoder.Decode(&decoded)
 	if err != nil {
 		return "", err
 	}
 
-	if len(scr.Fields) == 0 {
+	if len(decoded.Fields) == 0 {
 		return "", fmt.Errorf("cannot find first section in secret %s", secret)
 	}
 
-	return scr.Fields[0].Value, nil
+	return decoded.Fields[0].Value, nil
 }
