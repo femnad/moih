@@ -15,7 +15,7 @@ type UpdateCfg struct {
 	ApiTokenSecret  string `arg:"required,-a" help:"Git(Hub|Lab) pass secret containing API token with admin:public_key permissions"`
 	KeyFile         string `arg:"-f" default:"$HOME/.ssh/{{ hostname }}.pub" help:"the public key file to upload"`
 	KeyName         string `arg:"-n" default:"{{ hostname }}" help:"Key name as listed in Git(Hub|Lab)"`
-	PasswordManager string `arg:"-p" default:"pass" help:"Password manager, pass or 1password"`
+	PasswordManager string `arg:"-P" default:"pass" help:"Password manager, pass or 1password"`
 	Target          string `arg:"required,-t" help:"target, gitlab or github"`
 	User            string `arg:"-u" default:"{{ username }}" help:"Git(Hub|Lab) username"`
 }
