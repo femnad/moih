@@ -2,15 +2,16 @@ package gcpstorage
 
 import (
 	"bytes"
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	"google.golang.org/api/option"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/option"
 )
 
 type clientWithContext struct {

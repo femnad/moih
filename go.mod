@@ -8,6 +8,6 @@ require (
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
 	github.com/google/go-github/v53 v53.2.0
 	github.com/xanzy/go-gitlab v0.86.0
-	golang.org/x/oauth2 v0.9.0
-	google.golang.org/api v0.130.0
+	golang.org/x/oauth2 v0.15.0
+	google.golang.org/api v0.154.0
 )
