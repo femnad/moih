@@ -8,8 +8,13 @@ import (
 	"github.com/anmitsu/go-shlex"
 )
 
+const (
+	passwordFieldLabel = "password"
+)
+
 type opFields struct {
 	Value string `json:"value"`
+	Label string `json:"label"`
 }
 
 type opSecret struct {
@@ -42,9 +47,11 @@ func (o OnePassword) ReadSecret(secret string) (string, error) {
 		return "", err
 	}
 
-	if len(decoded.Fields) == 0 {
-		return "", fmt.Errorf("cannot find first section in secret %s", secret)
+	for _, field := range decoded.Fields {
+		if field.Label == passwordFieldLabel {
+			return field.Value, nil
+		}
 	}
 
-	return decoded.Fields[0].Value, nil
+	return "", fmt.Errorf("unable to password field in secret %s", secret)
 }
